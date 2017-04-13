@@ -32,17 +32,6 @@ static const std::regex UNSIGNED_INT_TYPE(UNSIGNED_INT_TYPE_STR);
 static const std::regex DOUBLE_TYPE(DOUBLE_TYPE_STR);
 static const std::regex UNSIGNED_DOUBLE_TYPE(UNSIGNED_DOUBLE_TYPE_STR);
 
-
-//static const std::regex INT_TYPE(POS_NEG_REG_STR_BASIC + INT_TYPE_REG_STR_BASIC);
-//static const std::regex UNSIGNED_INT_TYPE(POS_REG_STR_BASIC + INT_TYPE_REG_STR_BASIC);
-//static const std::regex DOUBLE_TYPE(POS_NEG_REG_STR_BASIC + INT_TYPE_REG_STR_BASIC + DEC_REG_STR_BASIC + INT_TYPE_REG_STR_BASIC);
-//static const std::regex UNSIGNED_DOUBLE_TYPE(POS_REG_STR_BASIC + INT_TYPE_REG_STR_BASIC + DEC_REG_STR_BASIC + INT_TYPE_REG_STR_BASIC);
-
-//static const std::regex INT_TYPE("[+-]?" + INT_TYPE_REG_STR_BASIC);
-//static const std::regex UNSIGNED_INT_TYPE("[+]?[0-9]+");
-//static const std::regex DOUBLE_TYPE("[+-]?[0-9]+[.]?[0-9]+");
-//static const std::regex UNSIGNED_DOUBLE_TYPE("[+]?[0-9]+[.]?[0-9]+");
-
 //list of all typedef/using
 using strVec = std::vector<std::string>;
 using strToStrMap = std::map<std::string, std::string>;
