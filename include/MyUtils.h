@@ -51,15 +51,12 @@ enum position : unsigned int
 
 namespace utils
 {
-  static void print(const strVec& col_, const char sep_ = SPACE_CHAR)
-  {
-    for (const std::string& elem : col_)
-    {
-      std::cout << elem << sep_;
-    }
-    std::cout << NEWLINE_CHAR;
-  }
-
+  /**
+   * gets the value of a tag from a string (this string could even be content of a file)
+   * @param content_: the source string
+   * @param tag_: looking for the value of this tag
+   * @param value_: the value of the tag from the content_(source string)
+   * */
   static void pasrseFromString(const std::string& content_, const std::string& tag_, std::string& value_)
   {
     std::regex reg_(".*?" + tag_ + "([^0-9.]*)([0-9.]*)");
@@ -71,11 +68,14 @@ namespace utils
     }
     else
     {
-      std::cerr << "ERROR: Couldn't find " << tag_ << " in " << content_ << NEWLINE_CHAR;
+      std::cerr << "ERROR: Couldn't find " << tag_ << " in:\n" << content_ << NEWLINE_CHAR;
       value_ = EMPTY_STR;
     }
   }
 
+  /**
+   * gets the entire content of a file in the form of std::string
+   * */
   static void getContentFromFile(const std::string& fileName_, std::string& content_)
   {
     std::ifstream file(fileName_);
@@ -94,12 +94,17 @@ namespace utils
     }
   }
 
+  /**
+   * gets the values of tags from a file (values in std::string)
+   * @param fileName_: name of the file
+   * @param tagToValuesMap_: a map to store the values of tags
+   * */
   static void getTagsFromConfig(const std::string& fileName_, strToStrMap& tagToValuesMap_)
   {
     std::string content;
     getContentFromFile(fileName_, content);
     
-    if (content != EMPTY_STR)
+    if (!content.empty())
     {
       for (auto& elem : tagToValuesMap_)
       {

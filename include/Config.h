@@ -6,10 +6,20 @@
 class Config
 {
 public:
-  using check = std::function<bool(const std::string&)>;
+  /**
+   * to pass the verification functions in  Config::configCheck
+   * */
+	using check = std::function<bool(const std::string&)>;
 
+  /**
+   * Initializes the config with default values
+   * */
   Config(const std::string& fileName_);
   
+  /**
+   * prints the errors encountered while reading the config
+   * @param fileName_: the file where it prints the errors
+   * */
   void printErrors(const std::string& fileName_);
  
   const std::string& getFileName() const { return _fileName; };
@@ -19,21 +29,33 @@ public:
   const size_t& getNumOfBins() const { return _numOfBins; };
 
 private:
-  // called by constructor, reads the configFile and assigns data to the member variables
+  /**
+   * called by constructor
+   * reads the configFile and assigns data (tag values) to the member variables (tags)
+   * */
   bool initialize();
 
+  /**
+   * validates the (type of) data read from config file
+   * and reports errors, if any (stores in _configError)
+   * @param tag_: the tag, whose values is being verified
+   * @param defaultValue_: the default value assigned in the constructor
+   * @param typeCheck_: the function which verifies that the tagValue_ read from config is of the correct type
+   * @param tagValue_: the value of the tag_ which was read from config
+   * @return True: if the tagValue_ is of the expected type
+   * */
   template <typename T>
-  bool configCheck(const std::string& variable_, const T& defaultValue_, const check& typeCheck_, std::string& tagValue_)
+  bool configCheck(const std::string& tag_, const T& defaultValue_, const check& typeCheck_, std::string& tagValue_)
   {
-    tagValue_ = _tagToValueMap[variable_];
+    tagValue_ = _tagToValueMap[tag_];
     bool checkResult = typeCheck_(tagValue_);
     if (!checkResult)
     {
       std::ostringstream os;
-      os << "Invalid value " << tagValue_ << " of " << variable_ << SPACE_CHAR
+      os << "Invalid value " << tagValue_ << " of " << tag_ << SPACE_CHAR
         << "Proceeding with its default value: " << defaultValue_ << NEWLINE_CHAR;
 
-      _configError[variable_] = os.str();
+      _configError[tag_] = os.str();
       std::cerr << os.str();
     }
     return checkResult;

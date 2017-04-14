@@ -4,9 +4,15 @@
 
 namespace
 {
-  Lines countDataLines(const std::string& dataFileName_)
+/**
+ * Reads the data file to determine the number of good lines (pure data lines)
+ * and the number of bad lines (comments, beginning with #, lines that don't contain any data)
+ * @param dataFileName_: the filename (with full path)
+ * @return a struct Lines, having number of good line and bad lines
+ * */
+  const Lines countDataLines(const std::string& dataFileName_)
   {
-    Lines _lines;
+    Lines lines;
     unsigned int goodlLines{ 0 }, badLines{ 0 };
 
     std::ifstream dataFileHandle(dataFileName_, std::ios::in);
@@ -27,15 +33,15 @@ namespace
       while (std::getline(dataFileHandle, rawStr))
         goodlLines++;
 
-      _lines.goodLines = goodlLines;
-      _lines.badLines = badLines;
+      lines.goodLines = goodlLines;
+      lines.badLines = badLines;
 
-      return _lines;
-    }
+      return lines;
+    } //data file handle is not good
     else
     {
       std::cerr << "Couldn't read the file in function: countGoodDataLines" << std::endl;
-      return _lines;
+      return lines;
     }
   }
 }
@@ -75,7 +81,7 @@ void Data::initializeData(const Lines& lines_)
 
 void Data::initialize()
 {
-  Lines lines = countDataLines(_dataFileName);
+  const Lines lines = countDataLines(_dataFileName);
   _dataSize = lines.goodLines;
 
   _disOrientation.resize(_dataSize, std::vector<double>(position::lengthPosition));
@@ -83,7 +89,6 @@ void Data::initialize()
   _orientation.resize(_dataSize, std::vector<double>(orientation::lengthOrientation));
   _confidenceIndex.resize(_dataSize);
 
-  // this function fills _coordinates, _orientation and _confidenceIndex from data file
   initializeData(lines);
   std::cout << "Done here" << std::endl;
 }

@@ -1,7 +1,7 @@
 #include "../include/Config.h"
 
 static const std::string MIN_CONFIDENCE_INDEX("confidence");
-static const std::string MISORIENTATION("Misorientation");
+static const std::string MISORIENTATION("misorientation");
 static const std::string MIN_GRAIN_SIZE("size");
 static const std::string NUM_OF_BINS("bins");
 
@@ -64,7 +64,7 @@ void Config::printErrors(const std::string& fileName_)
   if (!_configError.empty())
   {
     std::ostringstream os;
-    os << "Following are the errors encountered while reading the confile file \"" << _fileName << "\"" << NEWLINE_CHAR;
+    os << "Following are the errors encountered while reading the config file \"" << _fileName << "\"" << NEWLINE_CHAR;
     
     for (auto configErrorItr = _configError.cbegin(); configErrorItr != _configError.cend(); configErrorItr++)
     {

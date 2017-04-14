@@ -1,8 +1,13 @@
+/**
+ * This file contains:
+ * - all type aliases (using)
+ * - all constants
+ * */
+
 #pragma once
 #include <iostream>
 #include <regex>
 #include <map>
-//list of all global static consts
 
 static const int ZERO{ 0 };
 static const unsigned int READLINE_LIMIT{ 253 };
@@ -13,7 +18,6 @@ static const char SKIP_CHAR{ '#' };
 
 static const std::string EMPTY_STR("");
 static const std::string DUMMY_STR("DUMMY_STR");
-//static const std::string DIGITS("0123456789");
 
 //these are basic for building high level objects
 static const std::string POS_REG_STR_BASIC("[+]?");
@@ -32,7 +36,6 @@ static const std::regex UNSIGNED_INT_TYPE(UNSIGNED_INT_TYPE_STR);
 static const std::regex DOUBLE_TYPE(DOUBLE_TYPE_STR);
 static const std::regex UNSIGNED_DOUBLE_TYPE(UNSIGNED_DOUBLE_TYPE_STR);
 
-//list of all typedef/using
 using strVec = std::vector<std::string>;
 using strToStrMap = std::map<std::string, std::string>;
 using sizetPair = std::pair<size_t, size_t>;
