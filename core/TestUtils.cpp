@@ -1,10 +1,12 @@
 #include "../include/Data.h"
 #include "../include/MyUtils.h"
-#include <windows.h>
 
 int main()
 {
-  const std::string configFile("c:\\users\\kumaa\\documents\\visual studio 2015\\projects\\CppConsoleApps\\CppConsoleApps\\sample.txt");
-  const std::string dataFile("c:\\users\\kumaa\\documents\\visual studio 2015\\projects\\CppConsoleApps\\CppConsoleApps\\data.txt");
+  const std::string configFile("e:\\Workspace\\Eclipse\\EBSD-2.0\\additional\\sample.txt");
+  const std::string dataFile("e:\\Workspace\\Eclipse\\EBSD-2.0\\additional\\data.txt");
 	Data data(configFile, dataFile);
+
+	// just to have a look at the stored values
+	std::cout << data.displayData() << std::endl;
 }

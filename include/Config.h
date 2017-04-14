@@ -1,4 +1,5 @@
 #pragma once
+
 #include "MyUtils.h"
 #include <sstream>
 #include <functional>
@@ -42,7 +43,7 @@ private:
    * @param defaultValue_: the default value assigned in the constructor
    * @param typeCheck_: the function which verifies that the tagValue_ read from config is of the correct type
    * @param tagValue_: the value of the tag_ which was read from config
-   * @return True: if the tagValue_ is of the expected type
+   * @return True: if the tagValue_ is of the expected type, False otherwise
    * */
   template <typename T>
   bool configCheck(const std::string& tag_, const T& defaultValue_, const check& typeCheck_, std::string& tagValue_)

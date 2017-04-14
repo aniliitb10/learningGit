@@ -10,7 +10,7 @@ namespace
  * @param dataFileName_: the filename (with full path)
  * @return a struct Lines, having number of good line and bad lines
  * */
-  const Lines countDataLines(const std::string& dataFileName_)
+  Lines countDataLines(const std::string& dataFileName_)
   {
     Lines lines;
     unsigned int goodlLines{ 0 }, badLines{ 0 };
@@ -53,6 +53,20 @@ Data::Data(const std::string& configFileName_, const std::string& dataFileName_)
   initialize();
 }
 
+std::string Data::displayData() const
+{
+	std::ostringstream os;
+	os << "phi1\tPHI\tphi2\tx\ty\tCI" << NEWLINE_CHAR;
+
+	for (size_t index = 0; index < _dataSize; ++index)
+	{
+		os << _orientation[index][orientation::phi1] << "\t" << _orientation[index][orientation::PHI] << "\t"
+			 << _orientation[index][orientation::phi2] << "\t" << _coordinates[index][coordinates::x] << "\t"
+			 << _coordinates[index][coordinates::y]    << "\t" << _confidenceIndex[index] << NEWLINE_CHAR;
+	}
+	return os.str();
+}
+
 void Data::initializeData(const Lines& lines_)
 {
   std::ifstream dataFileHandle(_dataFileName, std::ios::in);
@@ -81,7 +95,7 @@ void Data::initializeData(const Lines& lines_)
 
 void Data::initialize()
 {
-  const Lines lines = countDataLines(_dataFileName);
+  const auto lines = countDataLines(_dataFileName);
   _dataSize = lines.goodLines;
 
   _disOrientation.resize(_dataSize, std::vector<double>(position::lengthPosition));
@@ -90,5 +104,4 @@ void Data::initialize()
   _confidenceIndex.resize(_dataSize);
 
   initializeData(lines);
-  std::cout << "Done here" << std::endl;
 }

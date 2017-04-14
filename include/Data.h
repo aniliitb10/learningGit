@@ -9,6 +9,11 @@ class Data
 public:
   Data(const std::string& configFileName_, const std::string& dataFileName_);
 
+  /**
+   * to display the stored data
+   * */
+  std::string displayData() const;
+
 private:
   /**
    * called by constructor
@@ -42,5 +47,4 @@ private:
   Config _config;
   std::string _dataFileName;
   size_t _dataSize;
-
 };

@@ -1,27 +1,8 @@
 #pragma once
+
 #include "Helper.h"
 #include "myMathUtils.h"
 #include <fstream>
-
-//template<typename T>
-//void readData(T& target)
-//{
-//  target = 0;
-//  char c;
-//  c = getchar();
-//  while ((c > digits::digit0) && (c < digits::digit9))
-//  {
-//    target *= 10;
-//    target += (c - digits::digit0)
-//      c = getchar();
-//  }
-//}
-//
-//enum class digits : char
-//{
-//  digit0 = '0',
-//  digit9 = '9'
-//};
 
 enum coordinates : unsigned int
 {
