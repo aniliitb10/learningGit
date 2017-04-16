@@ -10,8 +10,10 @@
 #include <regex>
 #include <map>
 
-static const int ZERO{ 0 };
+static const int ZERO_INT{ 0 };
+static const double ZERO_DOUBLE{ 0.00 };
 static const unsigned int READLINE_LIMIT{ 253 };
+static const double CUSTOM_NAN_DIS{10000.0};
 
 static const char SPACE_CHAR(' ');
 static const char NEWLINE_CHAR{ '\n' };

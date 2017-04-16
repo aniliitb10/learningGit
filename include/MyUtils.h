@@ -3,6 +3,8 @@
 #include "Helper.h"
 #include "myMathUtils.h"
 #include <fstream>
+#include <exception>
+#include <string>
 
 enum coordinates : unsigned int
 {
@@ -29,6 +31,18 @@ enum position : unsigned int
   rightDown, // = 5
   lengthPosition     // = 6
 };
+
+class Custom_Exception : public std::exception
+{
+public:
+	Custom_Exception(std::string msg_):_msg(msg_) {}
+	virtual const char* what() const noexcept { return _msg.c_str(); }
+
+private:
+	std::string _msg;
+};
+
+#define CUSTOM_ASSERT(condition, msg) do { if (!(condition)) throw Custom_Exception(msg); } while(0)
 
 namespace utils
 {
@@ -62,11 +76,11 @@ namespace utils
     std::ifstream file(fileName_);
     if (file.good())
     {
-      file.seekg(ZERO, file.end);
+      file.seekg(ZERO_INT, file.end);
       size_t fileLength = static_cast<size_t>(file.tellg());
       content_.resize(fileLength);
-      file.seekg(ZERO); //important to reset to start here
-      file.read(&content_[ZERO], fileLength);
+      file.seekg(ZERO_INT); //important to reset to start here
+      file.read(&content_[ZERO_INT], fileLength);
     }
     else
     {
@@ -98,4 +112,4 @@ namespace utils
       std::cerr << "ERROR: Couldn't read the config" << NEWLINE_CHAR;
     }
   }
-}
+}//namespace utils

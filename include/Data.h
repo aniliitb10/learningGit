@@ -39,6 +39,12 @@ private:
    * */
   void calcDisorientation();
 
+  /**
+   * Called by calcDisorientation()
+   * fills the disorientation values for points at boundaries by CUSTOM_NAN
+   * */
+  void handleDisForEdgePoints();
+
   std::vector <std::vector <double>> _coordinates;
   std::vector <std::vector <double>> _orientation;
   std::vector <double> _confidenceIndex;

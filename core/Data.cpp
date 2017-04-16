@@ -1,6 +1,7 @@
 #include "../include/Data.h"
 
 #include <fstream>
+#include <algorithm>
 
 namespace
 {
@@ -87,7 +88,7 @@ void Data::initializeData(const Lines& lines_)
       sscanf(rawStr.c_str(), "%lf %lf %lf %lf %lf %s %lf",
              &_orientation[dataCounter][orientation::phi1], &_orientation[dataCounter][orientation::PHI], &_orientation[dataCounter][orientation::phi2],
              &_coordinates[dataCounter][coordinates::x], &_coordinates[dataCounter][coordinates::y],
-             &tmpIQ[ZERO], &_confidenceIndex[dataCounter]);
+             &tmpIQ[ZERO_INT], &_confidenceIndex[dataCounter]);
       dataCounter++;
     }
   }
@@ -104,4 +105,75 @@ void Data::initialize()
   _confidenceIndex.resize(_dataSize);
 
   initializeData(lines);
+}
+
+void Data::handleDisForEdgePoints()
+{
+	const auto& orientationItr = std::find_if(_orientation.begin(), _orientation.end(),
+																						[&](const auto& elem_) {return elem_[coordinates::y] > ZERO_DOUBLE;});
+
+	CUSTOM_ASSERT(orientationItr != _orientation.end(), "Couldn't find non-zero y coordinate in data");
+
+	const size_t points_on_x_axis = std::distance(orientationItr, _orientation.begin()) + 1; //including the last element
+	CUSTOM_ASSERT((_dataSize % points_on_x_axis == 0), "Number of points on x-axis doesn't divide the total number of points");
+
+	auto disItrBegin = _disOrientation.begin();
+	auto disItrEnd = _disOrientation.end();
+
+	//taking care of bottom line (except first and last point)
+	std::for_each(std::next(disItrBegin), std::next(disItrBegin, (points_on_x_axis - 1)),
+																				[&](auto& elem){ elem[position::leftDown] = CUSTOM_NAN_DIS;
+																												 elem[position::rightDown] = CUSTOM_NAN_DIS;
+																												});
+
+	//taking care of the top most line (except first and last point)
+	std::for_each(std::prev(disItrEnd, (points_on_x_axis + 1)), std::prev(disItrEnd),
+																				[&](auto& elem){ elem[position::leftUp] = CUSTOM_NAN_DIS;
+																												 elem[position::rightUp] = CUSTOM_NAN_DIS;
+																												});
+
+	//taking care of the first column (except first and last point)
+	for (auto itr = std::next(_disOrientation.begin(), points_on_x_axis); itr != _disOrientation.end(); ++itr)
+	{
+		_disOrientation[position::left] = CUSTOM_NAN_DIS;
+		_disOrientation[position::leftDown] = CUSTOM_NAN_DIS;
+		_disOrientation[position::leftUp] = CUSTOM_NAN_DIS;
+
+		itr = std::next(itr, points_on_x_axis);
+	}
+
+	//taking care of the last column (except first and last point)
+	for (auto itr = std::next(_disOrientation.begin(), (points_on_x_axis -1)); itr != _disOrientation.end(); ++itr)
+	{
+		_disOrientation[position::right] = CUSTOM_NAN_DIS;
+		_disOrientation[position::rightDown] = CUSTOM_NAN_DIS;
+		_disOrientation[position::rightUp] = CUSTOM_NAN_DIS;
+
+		itr = std::next(itr, points_on_x_axis);
+	}
+
+	// now, taking care of the four points at the four corners
+	// at the left bottom corner
+	_disOrientation[0][left] = CUSTOM_NAN_DIS;
+	_disOrientation[0][leftUp] = CUSTOM_NAN_DIS;
+	_disOrientation[0][leftDown] = CUSTOM_NAN_DIS;
+	_disOrientation[0][rightDown] = CUSTOM_NAN_DIS;
+
+	// at the right bottom corner
+	_disOrientation[points_on_x_axis-1][right] = CUSTOM_NAN_DIS;
+	_disOrientation[points_on_x_axis-1][rightUp] = CUSTOM_NAN_DIS;
+	_disOrientation[points_on_x_axis-1][rightDown] = CUSTOM_NAN_DIS;
+	_disOrientation[points_on_x_axis-1][leftDown] = CUSTOM_NAN_DIS;
+
+	// at the left top corner
+	_disOrientation[_dataSize-points_on_x_axis][left] = CUSTOM_NAN_DIS;
+	_disOrientation[_dataSize-points_on_x_axis][leftUp] = CUSTOM_NAN_DIS;
+	_disOrientation[_dataSize-points_on_x_axis][leftDown] = CUSTOM_NAN_DIS;
+	_disOrientation[_dataSize-points_on_x_axis][rightUp] = CUSTOM_NAN_DIS;
+
+	// at the right top corner
+	_disOrientation[_dataSize-1][right] = CUSTOM_NAN_DIS;
+	_disOrientation[_dataSize-1][rightUp] = CUSTOM_NAN_DIS;
+	_disOrientation[_dataSize-1][rightDown] = CUSTOM_NAN_DIS;
+	_disOrientation[_dataSize-1][leftUp] = CUSTOM_NAN_DIS;
 }
