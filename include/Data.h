@@ -53,4 +53,5 @@ private:
   Config _config;
   std::string _dataFileName;
   size_t _dataSize;
+  size_t _numOfPointsInTheBottomRow;
 };
