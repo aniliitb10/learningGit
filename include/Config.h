@@ -10,7 +10,7 @@ public:
   /**
    * to pass the verification functions in  Config::configCheck
    * */
-	using check = std::function<bool(const std::string&)>;
+  using check = std::function<bool(const std::string&)>;
 
   /**
    * Initializes the config with default values

@@ -17,6 +17,8 @@ static const unsigned int READLINE_LIMIT { 253 };
 static const double CUSTOM_NAN_DOUBLE {std::numeric_limits<double>::max()};
 static const size_t CUSTOM_NAN_SIZE_T {std::numeric_limits<size_t>::max()};
 
+constexpr double PI { 3.14159265358979323846 };
+
 static const char SPACE_CHAR(' ');
 static const char NEWLINE_CHAR{ '\n' };
 static const char SKIP_CHAR{ '#' };
@@ -44,6 +46,7 @@ static const std::regex UNSIGNED_DOUBLE_TYPE(UNSIGNED_DOUBLE_TYPE_STR);
 using strVec = std::vector<std::string>;
 using strToStrMap = std::map<std::string, std::string>;
 using sizetPair = std::pair<size_t, size_t>;
+using doubleVec = std::vector<double>;
 
 struct Lines
 {

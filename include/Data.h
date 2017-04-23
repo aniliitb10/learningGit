@@ -1,6 +1,5 @@
 #pragma once
 
-#include "MyUtils.h"
 #include "Config.h"
 #include <vector>
 
@@ -12,7 +11,7 @@ public:
   /**
    * to display the stored data
    * */
-  std::string displayData() const;
+  void displayData(const std::string& filePath_) const;
 
 private:
   /**
@@ -38,6 +37,13 @@ private:
    * store them in _disOrientation
    * */
   void calcDisorientation();
+
+
+  /**
+  * actual calculation of Disorientation
+  **/
+
+  double misorientation(size_t index1, size_t index_2);
 
   /**
    * Called by calcDisorientation()
