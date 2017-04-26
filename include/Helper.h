@@ -11,17 +11,18 @@
 #include <map>
 #include <limits>
 
-static const int ZERO_INT { 0 };
-static const double ZERO_DOUBLE { 0.00 };
-static const unsigned int READLINE_LIMIT { 253 };
-static const double CUSTOM_NAN_DOUBLE {std::numeric_limits<double>::max()};
-static const size_t CUSTOM_NAN_SIZE_T {std::numeric_limits<size_t>::max()};
+static constexpr int ZERO_INT { 0 };
+static constexpr double ZERO_DOUBLE { 0.00 };
+static constexpr unsigned int READLINE_LIMIT { 253 };
+static constexpr double CUSTOM_NAN_DOUBLE_MAX {std::numeric_limits<double>::max()};
+static constexpr double CUSTOM_NAN_DOUBLE_MIN { std::numeric_limits<double>::min() };
+static constexpr size_t CUSTOM_NAN_SIZE_T {std::numeric_limits<size_t>::max()};
 
-constexpr double PI { 3.14159265358979323846 };
+static constexpr double PI { 3.14159265358979323846 };
 
-static const char SPACE_CHAR(' ');
-static const char NEWLINE_CHAR{ '\n' };
-static const char SKIP_CHAR{ '#' };
+static constexpr char SPACE_CHAR(' ');
+static constexpr char NEWLINE_CHAR{ '\n' };
+static constexpr char SKIP_CHAR{ '#' };
 
 static const std::string EMPTY_STR("");
 static const std::string DUMMY_STR("DUMMY_STR");

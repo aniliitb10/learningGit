@@ -114,10 +114,10 @@ void Data::initialize()
   const auto lines = countDataLines(_dataFileName);
   _dataSize = lines.goodLines;
 
-  _disOrientation.resize(_dataSize, std::vector<double>(position::lengthPosition));
-  _coordinates.resize(_dataSize, std::vector<double>(coordinates::lengthCoordinates));
-  _orientation.resize(_dataSize, std::vector<double>(orientation::lengthOrientation));
-  _confidenceIndex.resize(_dataSize);
+  _disOrientation.resize(_dataSize, std::vector<double>(position::lengthPosition, CUSTOM_NAN_DOUBLE_MIN));
+  _coordinates.resize(_dataSize, std::vector<double>(coordinates::lengthCoordinates, CUSTOM_NAN_DOUBLE_MIN));
+  _orientation.resize(_dataSize, std::vector<double>(orientation::lengthOrientation, CUSTOM_NAN_DOUBLE_MIN));
+  _confidenceIndex.resize(_dataSize, CUSTOM_NAN_DOUBLE_MIN);
 
   initializeData(lines);
 }
@@ -141,43 +141,42 @@ void Data::calcDisorientation()
 
   for (size_t index = 0; index < _dataSize; ++index)
   {
-    if ((_disOrientation[index][position::left] != CUSTOM_NAN_DOUBLE) &&
-      (_disOrientation[index - neighbours.left][position::right] != CUSTOM_NAN_DOUBLE))
+    if ((_disOrientation[index][position::left] != CUSTOM_NAN_DOUBLE_MAX) &&
+      (_disOrientation[index - neighbours.left][position::right] != CUSTOM_NAN_DOUBLE_MAX))
     {
       _disOrientation[index][position::left] = misorientation(index, index - neighbours.left);
     }
 
-    if ((_disOrientation[index][position::right] != CUSTOM_NAN_DOUBLE) &&
-      (_disOrientation[index + neighbours.right][position::left] != CUSTOM_NAN_DOUBLE))
+    if ((_disOrientation[index][position::right] != CUSTOM_NAN_DOUBLE_MAX) &&
+      (_disOrientation[index + neighbours.right][position::left] != CUSTOM_NAN_DOUBLE_MAX))
     {
       _disOrientation[index][position::right] = misorientation(index, index + neighbours.right);
     }
 
-    if ((_disOrientation[index][position::leftUp] != CUSTOM_NAN_DOUBLE) &&
-      (_disOrientation[index + neighbours.leftUp][position::rightDown] != CUSTOM_NAN_DOUBLE))
+    if ((_disOrientation[index][position::leftUp] != CUSTOM_NAN_DOUBLE_MAX) &&
+      (_disOrientation[index + neighbours.leftUp][position::rightDown] != CUSTOM_NAN_DOUBLE_MAX))
     {
       _disOrientation[index][position::leftUp] = misorientation(index, index + neighbours.leftUp);
     }
 
-    if ((_disOrientation[index][position::rightUp] != CUSTOM_NAN_DOUBLE) &&
-      (_disOrientation[index + neighbours.rightUp][position::leftDown] != CUSTOM_NAN_DOUBLE))
+    if ((_disOrientation[index][position::rightUp] != CUSTOM_NAN_DOUBLE_MAX) &&
+      (_disOrientation[index + neighbours.rightUp][position::leftDown] != CUSTOM_NAN_DOUBLE_MAX))
     {
       _disOrientation[index][position::rightUp] = misorientation(index, index + neighbours.rightUp);
     }
 
-    if ((_disOrientation[index][position::leftDown] != CUSTOM_NAN_DOUBLE) &&
-      (_disOrientation[index - neighbours.leftDown][position::rightUp] != CUSTOM_NAN_DOUBLE))
+    if ((_disOrientation[index][position::leftDown] != CUSTOM_NAN_DOUBLE_MAX) &&
+      (_disOrientation[index - neighbours.leftDown][position::rightUp] != CUSTOM_NAN_DOUBLE_MAX))
     {
       _disOrientation[index][position::leftDown] = misorientation(index, index - neighbours.leftDown);
     }
 
-    if ((_disOrientation[index][position::rightDown] != CUSTOM_NAN_DOUBLE) &&
-      (_disOrientation[index - neighbours.rightDown][position::leftUp] != CUSTOM_NAN_DOUBLE))
+    if ((_disOrientation[index][position::rightDown] != CUSTOM_NAN_DOUBLE_MAX) &&
+      (_disOrientation[index - neighbours.rightDown][position::leftUp] != CUSTOM_NAN_DOUBLE_MAX))
     {
       _disOrientation[index][position::rightDown] = misorientation(index, index - neighbours.rightDown);
     }
   }
-
 }
 
 void Data::handleDisForEdgePoints()
@@ -198,8 +197,8 @@ void Data::handleDisForEdgePoints()
   //taking care of bottom line (except first and last point)
   std::for_each(std::next(_disOrientation.begin()),
                 std::next(_disOrientation.begin(), (_numOfPointsInTheBottomRow - 1)),
-                [&](auto& elem){ elem[position::leftDown] = CUSTOM_NAN_DOUBLE;
-                                 elem[position::rightDown] = CUSTOM_NAN_DOUBLE;
+                [&](auto& elem){ elem[position::leftDown] = CUSTOM_NAN_DOUBLE_MAX;
+                                 elem[position::rightDown] = CUSTOM_NAN_DOUBLE_MAX;
                                });
 
   // as the number of points in the top row is one less than that in bottom row
@@ -207,51 +206,65 @@ void Data::handleDisForEdgePoints()
 
   //taking care of the top most line (except first and last point)
   std::for_each(std::next(firstPointOfLastRowItr), std::prev(_disOrientation.end()), //excludes the 2nd argument
-                          [&](auto& elem){ elem[position::leftUp] = CUSTOM_NAN_DOUBLE;
-                                            elem[position::rightUp] = CUSTOM_NAN_DOUBLE;
+                          [&](auto& elem){ elem[position::leftUp] = CUSTOM_NAN_DOUBLE_MAX;
+                                            elem[position::rightUp] = CUSTOM_NAN_DOUBLE_MAX;
                                           });
 
   //taking care of the first column (except first and last point)
   for (size_t index = (2 * _numOfPointsInTheBottomRow - 1); index < _dataSize;)
   {
-    _disOrientation[index][position::left] = CUSTOM_NAN_DOUBLE;
-    _disOrientation[index][position::leftDown] = CUSTOM_NAN_DOUBLE;
-    _disOrientation[index][position::leftUp] = CUSTOM_NAN_DOUBLE;
+    _disOrientation[index][position::left] = CUSTOM_NAN_DOUBLE_MAX;
+    _disOrientation[index][position::leftDown] = CUSTOM_NAN_DOUBLE_MAX;
+    _disOrientation[index][position::leftUp] = CUSTOM_NAN_DOUBLE_MAX;
 
     index += (2 * _numOfPointsInTheBottomRow - 1);
   }
 
   //taking care of the last column (except first and last point)
-  for (size_t index = (_numOfPointsInTheBottomRow - 1); index < _dataSize;)
+  for (size_t index = (3 * _numOfPointsInTheBottomRow - 2); index < _dataSize;)
   {
-    _disOrientation[index][position::right] = CUSTOM_NAN_DOUBLE;
-    _disOrientation[index][position::rightDown] = CUSTOM_NAN_DOUBLE;
-    _disOrientation[index][position::rightUp] = CUSTOM_NAN_DOUBLE;
+    _disOrientation[index][position::right] = CUSTOM_NAN_DOUBLE_MAX;
+    _disOrientation[index][position::rightDown] = CUSTOM_NAN_DOUBLE_MAX;
+    _disOrientation[index][position::rightUp] = CUSTOM_NAN_DOUBLE_MAX;
 
     index += (2 * _numOfPointsInTheBottomRow - 1);
   }
 
   // now, taking care of the four points at the four corners
   // at the left bottom corner
-  _disOrientation[0][left] = CUSTOM_NAN_DOUBLE;
-  _disOrientation[0][leftUp] = CUSTOM_NAN_DOUBLE;
-  _disOrientation[0][leftDown] = CUSTOM_NAN_DOUBLE;
-  _disOrientation[0][rightDown] = CUSTOM_NAN_DOUBLE;
+  _disOrientation[0][left] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[0][leftUp] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[0][leftDown] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[0][rightDown] = CUSTOM_NAN_DOUBLE_MAX;
 
   // at the right bottom corner
-  _disOrientation[_numOfPointsInTheBottomRow-1][right] = CUSTOM_NAN_DOUBLE;
-  _disOrientation[_numOfPointsInTheBottomRow-1][rightUp] = CUSTOM_NAN_DOUBLE;
-  _disOrientation[_numOfPointsInTheBottomRow-1][rightDown] = CUSTOM_NAN_DOUBLE;
-  _disOrientation[_numOfPointsInTheBottomRow-1][leftDown] = CUSTOM_NAN_DOUBLE;
+  _disOrientation[_numOfPointsInTheBottomRow-1][right] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[_numOfPointsInTheBottomRow-1][rightUp] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[_numOfPointsInTheBottomRow-1][rightDown] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[_numOfPointsInTheBottomRow-1][leftDown] = CUSTOM_NAN_DOUBLE_MAX;
 
   // at the left top corner (careful, the number of points in this row is one less than that in bottom row)
   // (and it has its left down neighbour)
-  _disOrientation[_dataSize- (_numOfPointsInTheBottomRow -1)][left] = CUSTOM_NAN_DOUBLE;
-  _disOrientation[_dataSize- (_numOfPointsInTheBottomRow -1)][leftUp] = CUSTOM_NAN_DOUBLE;
-  _disOrientation[_dataSize- (_numOfPointsInTheBottomRow -1)][rightUp] = CUSTOM_NAN_DOUBLE;
+  _disOrientation[_dataSize- (_numOfPointsInTheBottomRow -1)][left] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[_dataSize- (_numOfPointsInTheBottomRow -1)][leftUp] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[_dataSize- (_numOfPointsInTheBottomRow -1)][rightUp] = CUSTOM_NAN_DOUBLE_MAX;
 
   // at the right top corner (it has its rightDown neighbour)
-  _disOrientation[_dataSize-1][right] = CUSTOM_NAN_DOUBLE;
-  _disOrientation[_dataSize-1][rightUp] = CUSTOM_NAN_DOUBLE;
-  _disOrientation[_dataSize-1][leftUp] = CUSTOM_NAN_DOUBLE;
+  _disOrientation[_dataSize-1][right] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[_dataSize-1][rightUp] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[_dataSize-1][leftUp] = CUSTOM_NAN_DOUBLE_MAX;
+
+  // 2nd column from beginning (no left neighbour)
+  for (size_t index = _numOfPointsInTheBottomRow; index < _dataSize;)
+  {
+    _disOrientation[index][left] = CUSTOM_NAN_DOUBLE_MAX;
+    index += (2 * _numOfPointsInTheBottomRow - 1);
+  }
+
+  // 2nd column from the end (no right neighbour) 
+  for (size_t index = (2 * _numOfPointsInTheBottomRow - 2); index < _dataSize;)
+  {
+    _disOrientation[index][right] = CUSTOM_NAN_DOUBLE_MAX;
+    index += (2 * _numOfPointsInTheBottomRow - 1);
+  }
 }
