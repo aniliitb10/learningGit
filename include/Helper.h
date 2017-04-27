@@ -48,6 +48,7 @@ using strVec = std::vector<std::string>;
 using strToStrMap = std::map<std::string, std::string>;
 using sizetPair = std::pair<size_t, size_t>;
 using doubleVec = std::vector<double>;
+using size_tVec = std::vector<size_t>;
 
 struct Lines
 {

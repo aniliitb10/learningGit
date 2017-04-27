@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <algorithm>
+#include <numeric>
 
 namespace
 {
@@ -104,9 +105,17 @@ void Data::initializeData(const Lines& lines_)
              &tmpIQ[ZERO_INT], &_confidenceIndex[dataCounter]);
       dataCounter++;
     }
+
+    std::iota(_id.begin(), _id.end(), 0);
+    std::fill(_size.begin(), _size.end(), 1);
   }
 
   calcDisorientation();
+}
+
+void Data::labelGrains()
+{
+
 }
 
 void Data::initialize()
@@ -118,6 +127,8 @@ void Data::initialize()
   _coordinates.resize(_dataSize, std::vector<double>(coordinates::lengthCoordinates, CUSTOM_NAN_DOUBLE_MIN));
   _orientation.resize(_dataSize, std::vector<double>(orientation::lengthOrientation, CUSTOM_NAN_DOUBLE_MIN));
   _confidenceIndex.resize(_dataSize, CUSTOM_NAN_DOUBLE_MIN);
+  _id.resize(_dataSize);
+  _size.resize(_dataSize);
 
   initializeData(lines);
 }
@@ -144,7 +155,7 @@ void Data::calcDisorientation()
     if ((_disOrientation[index][position::left] != CUSTOM_NAN_DOUBLE_MAX) &&
       (_disOrientation[index - neighbours.left][position::right] != CUSTOM_NAN_DOUBLE_MAX))
     {
-      _disOrientation[index][position::left] = misorientation(index, index - neighbours.left);
+      _disOrientation[index][position::left] = _disOrientation[index - neighbours.left][position::right];
     }
 
     if ((_disOrientation[index][position::right] != CUSTOM_NAN_DOUBLE_MAX) &&
@@ -168,13 +179,13 @@ void Data::calcDisorientation()
     if ((_disOrientation[index][position::leftDown] != CUSTOM_NAN_DOUBLE_MAX) &&
       (_disOrientation[index - neighbours.leftDown][position::rightUp] != CUSTOM_NAN_DOUBLE_MAX))
     {
-      _disOrientation[index][position::leftDown] = misorientation(index, index - neighbours.leftDown);
+      _disOrientation[index][position::leftDown] = _disOrientation[index - neighbours.leftDown][position::rightUp];
     }
 
     if ((_disOrientation[index][position::rightDown] != CUSTOM_NAN_DOUBLE_MAX) &&
       (_disOrientation[index - neighbours.rightDown][position::leftUp] != CUSTOM_NAN_DOUBLE_MAX))
     {
-      _disOrientation[index][position::rightDown] = misorientation(index, index - neighbours.rightDown);
+      _disOrientation[index][position::rightDown] = _disOrientation[index - neighbours.rightDown][position::leftUp];
     }
   }
 }

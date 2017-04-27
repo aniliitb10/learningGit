@@ -136,4 +136,48 @@ namespace utils
       std::cerr << "ERROR: Couldn't read the config" << NEWLINE_CHAR;
     }
   }
+
+  /**
+  * finds the root of an index from id
+  * @param id_: the vector of all ids
+  * @param index_: the index whose id to look for
+  * @return: id of the index_ from id_
+  * */
+  static size_t findRoot(const size_tVec& id_, size_t index_)
+  {
+    while (index_ != id_[index_])
+      index_ = id_[id_[index_]];     //path compression;
+    return index_;
+  }
+
+  /**
+  * joins the two points, precisely, makes their ids same
+  * it is weighted, efficient. Looks at the size of points before making their ids same
+  * so that, one doesn't become too long
+  * @param id_: the vector of all ids
+  * @param size_: the vector of size of all ids
+  * @param: index1_: index of one of the points to join
+  * @param: index2_: index of the other point to join
+  * */
+  static void unionPoints(size_tVec& id_, size_tVec& size_, size_t index1_, size_t index2_)
+  {
+    size_t l = findRoot(id_, index1_);
+    size_t m = findRoot(id_, index2_);
+    size_t size_l = size_[l];
+    size_t size_m = size_[m];
+
+    if (l != m)
+    {
+      if (size_l < size_m)   //weighted! efficient!
+      {
+        id_[l] = m;
+        size_[m] += size_l;
+      }
+      else
+      {
+        id_[m] = l;
+        size_[l] += size_m;
+      }
+    }
+  }
 }//namespace utils

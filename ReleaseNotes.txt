@@ -2,6 +2,11 @@
 || EBSD 2.0: List of features in latest release with what's coming next!                                             ||
 || ***************************************************************************************************************** ||
 
+27 Apr 2017 08.29 AM
+ - Added functions for getting id of a point, joining points
+ - labelling still pending
+ - then will start calculating the real parameters, like GAM and GSD
+
 26 Apr 2017
  - Done with calculation of disorientation, calculated values look good
  - Time to calculate the real parameters, like GAM and GSD

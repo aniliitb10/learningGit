@@ -55,6 +55,8 @@ private:
   std::vector <std::vector <double>> _orientation;
   std::vector <double> _confidenceIndex;
   std::vector <std::vector <double>> _disOrientation;
+  std::vector <size_t> _size;
+  std::vector <size_t> _id;
  
   Config _config;
   std::string _dataFileName;
