@@ -3,15 +3,16 @@
 
 int main()
 {
-  const std::string configFile("e:\\Workspace\\Eclipse\\EBSD-2.0\\additional\\sample.txt");
-  const std::string dataFile("e:\\Workspace\\Eclipse\\EBSD-2.0\\additional\\data.txt");
+  const std::string configFile("d:\\Workspace\\Eclipse\\EBSD 2.0 Files\\additional\\sample.txt");
+  //const std::string dataFile("d:\\Workspace\\Eclipse\\EBSD-2.0\\additional\\data.txt");
+  const std::string dataFile("d:\\Workspace\\Eclipse\\EBSD 2.0 Files\\additional\\grain file new.txt");
   
   try
   {
     Data data(configFile, dataFile);
 
     // just to have a look at the stored values
-    data.displayData("e:\\Workspace\\Eclipse\\EBSD-2.0\\additional\\data_out.txt");
+    data.displayData("d:\\Workspace\\Eclipse\\EBSD 2.0 Files\\additional\\data_out.txt");
   }
   catch (const Custom_Exception& e)
   {

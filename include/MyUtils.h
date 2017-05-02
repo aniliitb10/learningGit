@@ -6,30 +6,36 @@
 #include <string>
 #include <cmath>
 
-enum coordinates : unsigned int
+enum coordinates : size_t
 {
   x = 0,
-  y,     // = 1,
+  y,                // = 1,
   lengthCoordinates // = 2
 };
 
-enum orientation : unsigned int
+enum orientation : size_t
 {
   phi1 = 0,
-  PHI,   // = 1,
-  phi2,  // = 2,
+  PHI,              // = 1,
+  phi2,             // = 2,
   lengthOrientation // = 3
 };
 
 enum position : size_t
 {
   left = 0,
-  right,     // = 1
-  leftUp,    // = 2
-  rightUp,   // = 3
-  leftDown,  // = 4
-  rightDown, // = 5
-  lengthPosition     // = 6
+  right,          // = 1
+  leftUp,         // = 2
+  rightUp,        // = 3
+  leftDown,       // = 4
+  rightDown,      // = 5
+  lengthPosition  // = 6
+};
+
+enum PointsStructure : size_t
+{
+  evenNumbered = 0,
+  oddNumbered // = 1
 };
 
 /**
@@ -178,6 +184,58 @@ namespace utils
         id_[m] = l;
         size_[l] += size_m;
       }
+    }
+  }
+
+  static void binnyfy(const doubleVec& values_, size_tVec& yAxis_, doubleVec& xAxis_)
+  {
+
+    const double max = *(std::max_element(values_.begin(), values_.end()));
+    const double min = *(std::min_element(values_.begin(), values_.end()));
+    const size_t bins = yAxis_.size();
+
+    const double xRange = (max - min) / static_cast<double>(bins); //usually this means (max_-0)/bins;
+    const double l = xRange / 2.0;
+    xAxis_[0] = min + l;
+    for (int i = 1; i < bins; ++i)
+      xAxis_[i] = xAxis_[i - 1] + xRange;
+
+    double values_size = values_.size();
+
+    for (int i = 0; i < values_size; ++i)
+    {
+      for (int j = 0; j < bins; ++j)
+      {
+        if (values_[i] >= (xAxis_[j] - l) && values_[i] < (xAxis_[j] + l))
+        {
+          yAxis_[j] += 1;
+          break;
+        }
+      }
+    }
+
+    for (unsigned int i = 0; i < values_size; ++i)
+    {
+      if (values_[i] < ((xAxis_[0] - l)))
+        yAxis_[0] += 1;
+      else if (values_[i] > (((xAxis_[bins - 1] + l))))
+        yAxis_[bins - 1] += 1;
+    }
+  }
+
+  static void writeDataToFile(const std::string& fileName_, const size_tVec& yAxis_, const doubleVec& xAxis_)
+  {
+    std::ofstream fileHandler(fileName_, std::ios::out | std::ios::trunc);
+    if (!fileHandler.good())
+    {
+      throw Custom_Exception("Couldn't open the file: " + fileName_);
+    }
+
+    CUSTOM_ASSERT(yAxis_.size() == xAxis_.size(), "Number of elements in x-axis and y-axis aren't same");
+
+    for (size_t index = 0; index < xAxis_.size(); ++index)
+    {
+      fileHandler << xAxis_[index] << "\t" << yAxis_[index] << NEWLINE_CHAR;
     }
   }
 }//namespace utils

@@ -28,19 +28,15 @@ private:
   void initializeData(const Lines& lines_);
 
   /**
-   * to label the grains with their grain ids
-   * */
-  void labelGrains();
-
-  /**
    * to calculate the misorientation between neighboring pixels and
    * store them in _disOrientation
+   * also, connects grains if the misorientation is below configured threshold
    * */
-  void calcDisorientation();
+  void calcDisorientationAndConnectGrains();
 
 
   /**
-  * actual calculation of Disorientation
+  * actual calculation of Disorientation array
   **/
 
   double misorientation(size_t index1, size_t index_2);
@@ -50,6 +46,17 @@ private:
    * fills the disorientation values for points at boundaries by CUSTOM_NAN
    * */
   void handleDisForEdgePoints();
+
+  /**
+  * to call every relevant function to generate the asked results
+  * */
+  void generateResults();
+
+
+  /**
+  * to calculate the grain size distribution
+  * */
+  void calcGSD();
 
   std::vector <std::vector <double>> _coordinates;
   std::vector <std::vector <double>> _orientation;

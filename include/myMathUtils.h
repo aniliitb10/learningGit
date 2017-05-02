@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helper.h"
+#include <cmath>
 
 namespace utils
 {

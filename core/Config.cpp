@@ -33,7 +33,7 @@ bool Config::initialize()
 
   std::string tagValue;
   //confidence index
-  if (configCheck(MIN_CONFIDENCE_INDEX, _minConfidenceIndex, utils::isUnsignedDoubleType, tagValue))
+  if (configCheck(MIN_CONFIDENCE_INDEX, _minConfidenceIndex, utils::isDoubleType, tagValue))
   {
     _minConfidenceIndex = std::stod(tagValue);
   }

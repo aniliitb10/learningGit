@@ -2,6 +2,10 @@
 || EBSD 2.0: List of features in latest release with what's coming next!                                             ||
 || ***************************************************************************************************************** ||
 
+02 May 2017 02.30 PM
+ - Added the function for GSD Calculaltion
+ - Result has some variation, need to look at it again 
+
 27 Apr 2017 08.29 AM
  - Added functions for getting id of a point, joining points
  - labelling still pending

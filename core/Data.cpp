@@ -59,17 +59,6 @@ Data::Data(const std::string& configFileName_, const std::string& dataFileName_)
 
 void Data::displayData(const std::string& filePath_) const
 {
-  //std::ostringstream os;
-  //os << "phi1\tPHI\tphi2\tx\ty\tCI" << NEWLINE_CHAR;
-
-  //for (size_t index = 0; index < _dataSize; ++index)
-  //{
-  //  os << _orientation[index][orientation::phi1] << "\t" << _orientation[index][orientation::PHI] << "\t"
-  //     << _orientation[index][orientation::phi2] << "\t" << _coordinates[index][coordinates::x] << "\t"
-  //     << _coordinates[index][coordinates::y]    << "\t" << _confidenceIndex[index] << NEWLINE_CHAR;
-  //}
-  //return os.str();
-
   std::fstream outputFileHandle(filePath_, std::ios::out);
 
   for (size_t index = 0; index < _disOrientation.size(); ++index)
@@ -108,14 +97,14 @@ void Data::initializeData(const Lines& lines_)
 
     std::iota(_id.begin(), _id.end(), 0);
     std::fill(_size.begin(), _size.end(), 1);
+
+    calcDisorientationAndConnectGrains();
+    generateResults();
   }
-
-  calcDisorientation();
-}
-
-void Data::labelGrains()
-{
-
+  else
+  {
+    throw Custom_Exception("Couldn't read the data file");
+  }
 }
 
 void Data::initialize()
@@ -142,48 +131,57 @@ double Data::misorientation(size_t index1, size_t index2)
                                _confidenceIndex[index2]);
 }
 
-void Data::calcDisorientation()
+void Data::calcDisorientationAndConnectGrains()
 {
-  std::cout << "Inside Data::calcDisorientation()" << std::endl;
+  std::cout << "Inside Data::calcDisorientationAndConnectGrains" << std::endl;
+  
   // start with assigning CUSTOM_NULL values to the points at the edges
   handleDisForEdgePoints();
+  const double misorientationThreshold = _config.getMisorientation();
 
   const Neighbors neighbours(_numOfPointsInTheBottomRow);
 
   for (size_t index = 0; index < _dataSize; ++index)
   {
-    if ((_disOrientation[index][position::left] != CUSTOM_NAN_DOUBLE_MAX) &&
-      (_disOrientation[index - neighbours.left][position::right] != CUSTOM_NAN_DOUBLE_MAX))
+    if (_disOrientation[index][position::left] != CUSTOM_NAN_DOUBLE_MAX)
     {
       _disOrientation[index][position::left] = _disOrientation[index - neighbours.left][position::right];
     }
 
-    if ((_disOrientation[index][position::right] != CUSTOM_NAN_DOUBLE_MAX) &&
-      (_disOrientation[index + neighbours.right][position::left] != CUSTOM_NAN_DOUBLE_MAX))
+    if (_disOrientation[index][position::right] != CUSTOM_NAN_DOUBLE_MAX)
     {
       _disOrientation[index][position::right] = misorientation(index, index + neighbours.right);
+      
+      if (_disOrientation[index][position::right] < misorientationThreshold)
+      {
+        utils::unionPoints(_id, _size, index, (index + neighbours.right));
+      }
     }
 
-    if ((_disOrientation[index][position::leftUp] != CUSTOM_NAN_DOUBLE_MAX) &&
-      (_disOrientation[index + neighbours.leftUp][position::rightDown] != CUSTOM_NAN_DOUBLE_MAX))
+    if (_disOrientation[index][position::leftUp] != CUSTOM_NAN_DOUBLE_MAX)
     {
       _disOrientation[index][position::leftUp] = misorientation(index, index + neighbours.leftUp);
+      if (_disOrientation[index][position::leftUp] < misorientationThreshold)
+      {
+        utils::unionPoints(_id, _size, index, (index + neighbours.leftUp));
+      }
     }
 
-    if ((_disOrientation[index][position::rightUp] != CUSTOM_NAN_DOUBLE_MAX) &&
-      (_disOrientation[index + neighbours.rightUp][position::leftDown] != CUSTOM_NAN_DOUBLE_MAX))
+    if (_disOrientation[index][position::rightUp] != CUSTOM_NAN_DOUBLE_MAX)
     {
       _disOrientation[index][position::rightUp] = misorientation(index, index + neighbours.rightUp);
+      if (_disOrientation[index][position::rightUp] < misorientationThreshold)
+      {
+        utils::unionPoints(_id, _size, index, (index + neighbours.rightUp));
+      }
     }
 
-    if ((_disOrientation[index][position::leftDown] != CUSTOM_NAN_DOUBLE_MAX) &&
-      (_disOrientation[index - neighbours.leftDown][position::rightUp] != CUSTOM_NAN_DOUBLE_MAX))
+    if (_disOrientation[index][position::leftDown] != CUSTOM_NAN_DOUBLE_MAX)
     {
       _disOrientation[index][position::leftDown] = _disOrientation[index - neighbours.leftDown][position::rightUp];
     }
 
-    if ((_disOrientation[index][position::rightDown] != CUSTOM_NAN_DOUBLE_MAX) &&
-      (_disOrientation[index - neighbours.rightDown][position::leftUp] != CUSTOM_NAN_DOUBLE_MAX))
+    if (_disOrientation[index][position::rightDown] != CUSTOM_NAN_DOUBLE_MAX)
     {
       _disOrientation[index][position::rightDown] = _disOrientation[index - neighbours.rightDown][position::leftUp];
     }
@@ -194,16 +192,20 @@ void Data::handleDisForEdgePoints()
 {
   const auto& firstPointOf2ndRowItr = std::find_if(_coordinates.begin(), _coordinates.end(),
                                             [](const auto& elem_) {return elem_[coordinates::y] > ZERO_DOUBLE;});
-  
 
   CUSTOM_ASSERT(firstPointOf2ndRowItr != _coordinates.end(), "Couldn't find non-zero y coordinate in data");
 
   _numOfPointsInTheBottomRow = std::distance(_coordinates.begin(), std::prev(firstPointOf2ndRowItr)) + 1; //including the last element
   
-  std::cout << "Number of points in the bottomRow: " << _numOfPointsInTheBottomRow << std::endl;
+  std::cout << "Number of points in the bottomRow: " << _numOfPointsInTheBottomRow << NEWLINE_CHAR;
 
-  CUSTOM_ASSERT((_dataSize % (2 * _numOfPointsInTheBottomRow -1 ) == 0),
-                "total number of points is not a multiple of points in the first two rows");
+  std::cout << "Total number of points: " << _dataSize << NEWLINE_CHAR;
+
+  CUSTOM_ASSERT(((_dataSize % (2 * _numOfPointsInTheBottomRow -1 ) == 0) ||
+               ((_dataSize % (2 * _numOfPointsInTheBottomRow - 1) == _numOfPointsInTheBottomRow))),
+                "total number of points do not make sense!");
+
+  PointsStructure pointsStructure = (((_dataSize % (2 * _numOfPointsInTheBottomRow - 1) == 0) ? evenNumbered : oddNumbered));
 
   //taking care of bottom line (except first and last point)
   std::for_each(std::next(_disOrientation.begin()),
@@ -212,8 +214,10 @@ void Data::handleDisForEdgePoints()
                                  elem[position::rightDown] = CUSTOM_NAN_DOUBLE_MAX;
                                });
 
-  // as the number of points in the top row is one less than that in bottom row
-  const auto& firstPointOfLastRowItr = std::prev(_disOrientation.end(), (_numOfPointsInTheBottomRow - 1));
+  // evenNumbered: the number of points in the top row is one less than that in bottom 
+  // oddNumbered: the number of points in the top row is equal to that in bottom row
+  const auto& firstPointOfLastRowItr = (pointsStructure == evenNumbered ? std::prev(_disOrientation.end(), (_numOfPointsInTheBottomRow - 1))
+                                                                        : std::prev(_disOrientation.end(), (_numOfPointsInTheBottomRow)));
 
   //taking care of the top most line (except first and last point)
   std::for_each(std::next(firstPointOfLastRowItr), std::prev(_disOrientation.end()), //excludes the 2nd argument
@@ -254,28 +258,77 @@ void Data::handleDisForEdgePoints()
   _disOrientation[_numOfPointsInTheBottomRow-1][rightDown] = CUSTOM_NAN_DOUBLE_MAX;
   _disOrientation[_numOfPointsInTheBottomRow-1][leftDown] = CUSTOM_NAN_DOUBLE_MAX;
 
-  // at the left top corner (careful, the number of points in this row is one less than that in bottom row)
+  // at the left top corner (careful, the number of points in this row 'could be' one less than that in bottom row)
   // (and it has its left down neighbour)
-  _disOrientation[_dataSize- (_numOfPointsInTheBottomRow -1)][left] = CUSTOM_NAN_DOUBLE_MAX;
-  _disOrientation[_dataSize- (_numOfPointsInTheBottomRow -1)][leftUp] = CUSTOM_NAN_DOUBLE_MAX;
-  _disOrientation[_dataSize- (_numOfPointsInTheBottomRow -1)][rightUp] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[_dataSize - (_numOfPointsInTheBottomRow -1) - pointsStructure][left] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[_dataSize - (_numOfPointsInTheBottomRow -1) - pointsStructure][leftUp] = CUSTOM_NAN_DOUBLE_MAX;
+  _disOrientation[_dataSize - (_numOfPointsInTheBottomRow -1) - pointsStructure][rightUp] = CUSTOM_NAN_DOUBLE_MAX;
+  if (pointsStructure == PointsStructure::oddNumbered)
+  {
+    _disOrientation[_dataSize - _numOfPointsInTheBottomRow][leftDown] = CUSTOM_NAN_DOUBLE_MAX;
+  }
 
   // at the right top corner (it has its rightDown neighbour)
   _disOrientation[_dataSize-1][right] = CUSTOM_NAN_DOUBLE_MAX;
   _disOrientation[_dataSize-1][rightUp] = CUSTOM_NAN_DOUBLE_MAX;
   _disOrientation[_dataSize-1][leftUp] = CUSTOM_NAN_DOUBLE_MAX;
+  if (pointsStructure == PointsStructure::oddNumbered)
+  {
+    _disOrientation[_dataSize - 1][rightDown] = CUSTOM_NAN_DOUBLE_MAX;
+  }
 
-  // 2nd column from beginning (no left neighbour)
+  // 2nd column from left end (no left neighbour)
   for (size_t index = _numOfPointsInTheBottomRow; index < _dataSize;)
   {
     _disOrientation[index][left] = CUSTOM_NAN_DOUBLE_MAX;
     index += (2 * _numOfPointsInTheBottomRow - 1);
   }
 
-  // 2nd column from the end (no right neighbour) 
+  // 2nd column from right end (no right neighbour) 
   for (size_t index = (2 * _numOfPointsInTheBottomRow - 2); index < _dataSize;)
   {
     _disOrientation[index][right] = CUSTOM_NAN_DOUBLE_MAX;
     index += (2 * _numOfPointsInTheBottomRow - 1);
   }
+}
+
+void Data::generateResults()
+{
+  //rightnow, just hard coding. Will figure out a way to get it by user later
+  calcGSD();
+}
+
+void Data::calcGSD()
+{
+  size_t maxId = *(std::max_element(_id.begin(), _id.end()));
+  
+  size_tVec grainSize(maxId + 1);
+  doubleVec diameter;
+
+  const double minConfidenceIndex = _config.getMinConfidenceIndex();
+  const size_t minGrainSize = std::max(_config.getMinGrainSize(), static_cast<size_t>(1));
+
+  const double stepSize = _coordinates[1][coordinates::x] - _coordinates[0][coordinates::x];
+
+  for (size_t index = 0; index < _size.size(); ++index)
+  {
+    if (_confidenceIndex[index] >= minConfidenceIndex)
+    {
+      grainSize[_id[index]] += 1;
+    }
+  }
+
+  for (size_t index = 0; index < grainSize.size(); ++index)
+  {
+    if (grainSize[index] >= minGrainSize)
+    {
+      diameter.push_back(1.05*stepSize*sqrt(grainSize[index]));
+    }
+  }
+
+  doubleVec xAxis(_config.getNumOfBins());
+  size_tVec yAxis(_config.getNumOfBins());
+
+  utils::binnyfy(diameter, yAxis, xAxis);
+  utils::writeDataToFile("d:\\Workspace\\Eclipse\\EBSD 2.0 Files\\additional\\gsd.txt", yAxis, xAxis);
 }
